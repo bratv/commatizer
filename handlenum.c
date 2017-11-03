@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include "utf.h"
 
 #define ADD dest[i] = src[k]
 
@@ -9,22 +10,103 @@ int num_of_commas(int n);
 void commatize(char* src, char* dest);
 int search_blank_symbol(char* p);
 void replace_blanks(char* p);
+void main_func(char* str, char* com, int spa, int st);
+int len_result(char* str);
+void set_comma(char* str);
+void set_spacing(int i);
+void set_start(int i);
 
-int spacing = 5;
+int spacing = 3;
 char comma[] = "❚-❚";
+int start = 0;
+int end;
 int size_first = 0;
 int size_second = 0;
 
 int main() {
-    //char str[] = "␢␢␢$-1400001.123456789±100 millions.";
-    char str[] = "pi=3.14159265358979323846264338327950288419716939937510582097494459231";  
+    char str[] = "␢␢␢$-1422221.123456789±100 millions.";
+    //char str[] = "pi=3.14159265358979323846264338327950288419716939937510582097494459231";  
     printf("original:\n%s\n", str);
-    int size = size_of_result(str);
-    char result[size + 1];
-    commatize(str, result);
-    printf("result:\n%s\n", result);
+	
     
-}        
+    main_func(str, "##", 2, 7);
+    
+}
+
+void main_func(char* str, char* com, int spa, int st) {
+	// setters
+	set_comma(com);
+	set_spacing(spa);
+	set_start(st);
+	
+	//if start is index 0, commatize whole string.
+	if(start == 0) {
+		printf("zero\n");
+		int size = size_of_result(str);
+		char result[size + 1];
+		commatize(str, result);
+		if(search_blank_symbol(result))
+		replace_blanks(result);
+		printf("result:\n%s\n", result);
+		
+	}
+	else {
+		end = no_of_tokens(str);
+		//get last part as substring.
+		int len_second = len_sub_str(str, start, end);
+		char dest_second[len_second + 1];
+		sub_str(str, dest_second, start, end);
+		
+		//commatize the substring.
+		int commatized_size = size_of_result(dest_second);
+		char commatized_part[commatized_size + 1];
+		commatize(dest_second, commatized_part);
+		
+		// get first part as substring.
+		int len_first = len_sub_str(str, 0, start);
+		char first_part[len_first + 1];
+		sub_str(str, first_part, 0, start);
+		
+		//merge the two parts into one string.
+		int size = len_first + commatized_size;
+		char result[size + 1];
+		strcpy(result, first_part);
+		strcat(result, commatized_part);
+		if(search_blank_symbol(result))
+			replace_blanks(result);
+		printf("result:\n%s", result);
+		
+		
+	}
+	
+}
+
+
+
+
+
+void set_comma(char* str) {
+	if(str == NULL) {
+		return;
+	}
+	if(strlen(str) > 100) {
+		printf("fuck you, too big commatize!");
+	}
+	else {
+		strcpy(comma, str);
+	}
+		
+}   
+
+void set_spacing(int i) {
+	if(i < 0) return;
+	else spacing = i;
+}
+
+void set_start(int i) {
+	if(i < 0) return;
+	else start = i;
+}
 
 int size_of_result(char* src) {
     int len = strlen(src);
@@ -91,9 +173,9 @@ int calc_jump(int n) {
 }
 
 void commatize(char* src, char* dest) {
-    if(search_blank_symbol(src)) {
-        replace_blanks(src);
-    }
+    //~ if(search_blank_symbol(src)) {
+        //~ replace_blanks(src);
+    //~ }
     int srclen = strlen(src);
     int initial_jump = calc_jump(size_first);
     int comlen = strlen(comma);
