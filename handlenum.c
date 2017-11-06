@@ -8,28 +8,26 @@
 int size_of_result(char* src);
 int num_of_commas(int n);
 void commatize(char* src, char* dest);
-int search_blank_symbol(char* p);
+int has_blank_symbols(char* p);
 void replace_blanks(char* p);
-void main_func(char* str, char* com, int spa, int st);
-int len_result(char* str);
+void main_func(char* str, char* comma, int spacing, int start);
 void set_comma(char* str);
 void set_spacing(int i);
 void set_start(int i);
 
 int spacing = 3;
-char comma[] = "❚-❚";
-int start = 0;
+char comma[] = ",";
+int start = 1;
 int end;
 int size_first = 0;
 int size_second = 0;
 
 int main() {
-    char str[] = "␢␢␢$-1422221.123456789±100 millions.";
-    //char str[] = "pi=3.14159265358979323846264338327950288419716939937510582097494459231";  
+    char str[] = "␢␢␢$-1422221.123456789±100 millions."; 
     printf("original:\n%s\n", str);
 	
     
-    main_func(str, "##", 2, 7);
+    main_func(str, " ", 2, 7);
     
 }
 
@@ -41,13 +39,12 @@ void main_func(char* str, char* com, int spa, int st) {
 	
 	//if start is index 0, commatize whole string.
 	if(start == 0) {
-		printf("zero\n");
 		int size = size_of_result(str);
 		char result[size + 1];
 		commatize(str, result);
-		if(search_blank_symbol(result))
-		replace_blanks(result);
-		printf("result:\n%s\n", result);
+		if(has_blank_symbols(result)) 
+			replace_blanks(result);
+		printf("%s\n", result);
 		
 	}
 	else {
@@ -72,30 +69,20 @@ void main_func(char* str, char* com, int spa, int st) {
 		char result[size + 1];
 		strcpy(result, first_part);
 		strcat(result, commatized_part);
-		if(search_blank_symbol(result))
+		
+		//add three spaces to penultimate part of string if necessary.
+		if(has_blank_symbols(result)) 
 			replace_blanks(result);
-		printf("result:\n%s", result);
-		
-		
+		printf("%s\n", result);
+			
 	}
 	
 }
 
-
-
-
-
 void set_comma(char* str) {
-	if(str == NULL) {
-		return;
-	}
-	if(strlen(str) > 100) {
-		printf("fuck you, too big commatize!");
-	}
-	else {
-		strcpy(comma, str);
-	}
-		
+	if(str == NULL) return;
+	if(strlen(str) > 100) return;
+	else strcpy(comma, str);	
 }   
 
 void set_spacing(int i) {
@@ -117,13 +104,13 @@ int size_of_result(char* src) {
     int size;
     int mark = 0;
     
-    if(search_blank_symbol(src)) size = -6;
+    if(has_blank_symbols(src)) 
+		size = -6;
     
     for(i = 0; i < len; i++) {
         c = src[i];
-        if(isdigit(c) && (c != '0')) {
-            break;
-        }
+        if(isdigit(c) && (c != '0')) 
+			break;
         else {
 
         }        
@@ -132,18 +119,18 @@ int size_of_result(char* src) {
     for(; i < len; i++) {
         c = src[i];
         if(isdigit(c)) {
-            if(mark) {
-                counter2++;
-            }
-            else counter1++;
+            if(mark) 
+				counter2++;
+            else 
+				counter1++;
         }
         else {
-            if(mark) break;
-            
-            if(c == '.') {
-                mark = 1;
-            } 
-            else break;
+            if(mark) 
+				break;           
+            if(c == '.')  
+				mark = 1; 
+            else 
+				break;
         }
     }
     
@@ -158,24 +145,24 @@ int size_of_result(char* src) {
 }
 
 int num_of_commas(int n) {
-	if(spacing <= 0) return 0;
+	if(spacing <= 0) 
+		return 0;
     int no_of_commas = n / spacing;
-    if((n % spacing) == 0)
-    no_of_commas--;
+    if((n % spacing) == 0) 
+		no_of_commas--;
     return no_of_commas; 
 }
 
 int calc_jump(int n) {
-	if(spacing <= 0) return 0;
+	if(spacing <= 0) 
+		return 0;
     int num = n % spacing;
-    if(num == 0) num = spacing;
+    if(num == 0) 
+		num = spacing;
     return num;
 }
 
 void commatize(char* src, char* dest) {
-    //~ if(search_blank_symbol(src)) {
-        //~ replace_blanks(src);
-    //~ }
     int srclen = strlen(src);
     int initial_jump = calc_jump(size_first);
     int comlen = strlen(comma);
@@ -189,22 +176,22 @@ void commatize(char* src, char* dest) {
     for(i = 0, k = 0; k < srclen; i++, k++) {
         c = src[k];
         if(isdigit(c)) {
-            if(c == '0') {
-                ADD;
-            }
-            else {
-                break;
-            }
+            if(c == '0') 
+				ADD;
+            else 
+				break;           
         }
         else ADD;
     }
     //jumps over the first numbers so that commatizing starts
-    //at the right position.
-    //ie. 1,000,000. instead of 100,000,0.
+    //at the right position. For aesthetic purposes.
+    //ie. 1,000,000.00 
+    //instead of 
+    //100,000,0.00
     for(p = 0; p < initial_jump; p++, i++, k++) {
         ADD;
     }
-    //adds comma symbols and correct ammount of jumps between them
+    //adds comma symbols and correct ammount of skips between them.
     int counter = 0;
     for(; (k < srclen) && (!mark) && (counter < commas); ) {
         
@@ -218,10 +205,7 @@ void commatize(char* src, char* dest) {
                 mark = 1;
                 break;
             }
-            else {
-                ADD;
-            }
-
+            else ADD;
         }
     }
     ADD;
@@ -229,12 +213,14 @@ void commatize(char* src, char* dest) {
     if(size_second > 0) {
         commas = num_of_commas(size_second);
         counter = 0;
-        int cntr = 0;
+        int j = 0;
         while((counter < commas)) {
             
-            for(p = 0; (p < spacing) && (cntr < size_second); p++, i++, k++) {
-                if(cntr >= size_second) break;
-                ADD; cntr++;
+            for(p = 0; (p < spacing) && (j < size_second); p++, i++, k++) {
+                if(j >= size_second) 
+					break;
+                ADD; 
+                j++;
             }
             for(p = 0; (p < comlen) && (counter < commas); p++, i++) {
                 dest[i] = comma[p];
@@ -250,7 +236,7 @@ void commatize(char* src, char* dest) {
     
 }
 
-int search_blank_symbol(char* p) {
+int has_blank_symbols(char* p) {
     //utf-8 encoded space symbol character takes three bytes.
     char arr[] = {226, 144, 162, '\0'};
     int counter = 0;
@@ -259,14 +245,14 @@ int search_blank_symbol(char* p) {
     
     for(i = 0; i < 9;) {
         for(k = 0; k < 3; k++, i++) {
-            if(p[i] == arr[k]) {
-                counter++;
-            }
+            if(p[i] == arr[k]) 
+				counter++;
         }        
     }
-    if(counter == 9)
-    return 1;
-    else return 0;
+    if(counter == 9) 
+		return 1;
+    else 
+		return 0;
 }
 
 void replace_blanks(char* p) {
@@ -284,4 +270,3 @@ void replace_blanks(char* p) {
     strcat(result, left);
     strncpy(p, result, original_length);
 }
-
